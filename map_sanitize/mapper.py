@@ -19,7 +19,7 @@ class ConfigKeys:
     # --- Sanitize values
     VALUES_TRIM_STRINGS = "values_trim_strings"
     VALUES_REMOVE_EMPTY_STRINGS = "values_remove_empty_strings"
-    VALUES_SIMPLFIY_WHITESPACE = "values_simplify_whitespace"
+    VALUES_SIMPLIFY_WHITESPACE = "values_simplify_whitespace"
 
 
 ConfigKeyType = tuple(
@@ -62,7 +62,7 @@ class SanitizeMapper(BasicMapper):
             description="Prefer None to empty string ''",
         ),
         th.Property(
-            ConfigKeys.VALUES_SIMPLFIY_WHITESPACE,
+            ConfigKeys.VALUES_SIMPLIFY_WHITESPACE,
             th.BooleanType,
             default=False,
             description="Change newlines and multiple consecutive spaces to a single space",
@@ -89,7 +89,7 @@ class SanitizeMapper(BasicMapper):
             and len(new_value) == 0
         ):
             new_value = None
-        if self.config.get(ConfigKeys.VALUES_SIMPLFIY_WHITESPACE) and isinstance(
+        if self.config.get(ConfigKeys.VALUES_SIMPLIFY_WHITESPACE) and isinstance(
             new_value, str
         ):
             new_value = " ".join(new_value.split(r"\s+"))
