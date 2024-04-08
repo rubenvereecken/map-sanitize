@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "map-sanitize"
+version = "0.1.0"
+description = "Sanitization mapper for Meltano"
+authors = ["Ruben Vereecken <ruben@20tech.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+singer-sdk = "^0.36.1"
+pydash = "^8.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+map-sanitize = 'map_sanitize.mapper:SanitizeMapper.cli'
