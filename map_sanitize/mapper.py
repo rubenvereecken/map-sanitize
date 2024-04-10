@@ -17,9 +17,12 @@ class ConfigKeys:
     KEYS_KEBAB_CASE = "keys_kebab_case"
 
     # --- Sanitize values
+    # Strings
     VALUES_TRIM_STRINGS = "values_trim_strings"
     VALUES_REMOVE_EMPTY_STRINGS = "values_remove_empty_strings"
     VALUES_SIMPLIFY_WHITESPACE = "values_simplify_whitespace"
+    # Arrays
+    VALUES_REMOVE_EMPTY_ARRAYS = "values_remove_empty_arrays"
 
 
 ConfigKeyType = tuple(
@@ -31,12 +34,12 @@ class SanitizeMapper(BasicMapper):
     name = "map-sanitize"
 
     config_jsonschema = th.PropertiesList(
-        th.Property(
-            ConfigKeys.PROPERTIES,
-            th.ArrayType,
-            default=None,
-            description="TODO",
-        ),
+        # th.Property(
+        #     ConfigKeys.PROPERTIES,
+        #     th.ArrayType,
+        #     default=None,
+        #     description="TODO",
+        # ),
         th.Property(
             ConfigKeys.KEYS_SNAKE_CASE,
             th.BooleanType,
@@ -67,6 +70,12 @@ class SanitizeMapper(BasicMapper):
             default=False,
             description="Change newlines and multiple consecutive spaces to a single space",
         ),
+        th.Property(
+            ConfigKeys.VALUES_REMOVE_EMPTY_ARRAYS,
+            th.BooleanType,
+            default=False,
+            description="Prefer None to empty array []",
+        ),
     ).to_dict()
 
     def _process_key(self, key: str):
@@ -93,20 +102,24 @@ class SanitizeMapper(BasicMapper):
             new_value, str
         ):
             new_value = " ".join(new_value.split(r"\s+"))
+        if (
+            self.config.get(ConfigKeys.VALUES_REMOVE_EMPTY_ARRAYS)
+            and isinstance(new_value, list)
+            and len(new_value) == 0
+        ):
+            new_value = None
 
         return new_value
 
     def _process_property_def(self, key, definition):
         new_key = self._process_key(key)
+
         return new_key, definition
 
     def map_schema_message(self, message_dict: dict) -> t.Iterable[Message]:
         for result in super().map_schema_message(message_dict):
-            self.logger.info("SCHEMA MSG")
-            self.logger.info(result)
-
             props: dict[str, t.Any] = result.schema["properties"]
-            required: list[str] = result.schema["required"] or []
+            required: list[str] = result.schema.get("required", [])
             key_props: list[str] | None = (
                 list(result.key_properties)
                 if result.key_properties is not None
